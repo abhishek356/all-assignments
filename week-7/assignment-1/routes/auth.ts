@@ -1,10 +1,13 @@
-const jwt = require("jsonwebtoken");
-const express = require('express');
-const { authenticateJwt, SECRET } = require("../middleware/");
-const { User } = require("../db");
+import  jwt from 'jsonwebtoken'
+import  express from 'express'
+import  {authenticateJwt} from "../middleware/index";
+import {SECRET} from '../middleware/index'
+import { Request,Response } from 'express';
+import  {User}  from "../db/index";
+
 const router = express.Router();
 
-  router.post('/signup', async (req, res) => {
+  router.post('/signup', async (req:Request, res:Response) => {
     const { username, password } = req.body;
     const user = await User.findOne({ username });
     if (user) {
@@ -29,7 +32,8 @@ const router = express.Router();
   });
 
     router.get('/me', authenticateJwt, async (req, res) => {
-      const user = await User.findOne({ _id: req.userId });
+      const userId = req.headers['userId']
+      const user = await User.findOne({ _id: userId });
       if (user) {
         res.json({ username: user.username });
       } else {
@@ -37,4 +41,4 @@ const router = express.Router();
       }
     });
 
-  module.exports = router
+  export default router;

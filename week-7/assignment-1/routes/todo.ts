@@ -1,12 +1,19 @@
-const express = require('express');
-const { authenticateJwt, SECRET } = require("../middleware/index");
-const { Todo } = require("../db");
+import express from 'express'
+//const express = require('express');
+import {authenticateJwt} from '../middleware/index';
+import {SECRET} from '../middleware/index'
+//const { authenticateJwt, SECRET } = require("../middleware/index");
+import  {Todo}  from "../db/index";
+import { Request, Response } from 'express';
 const router = express.Router();
 
-router.post('/todos', authenticateJwt, (req, res) => {
+
+
+
+router.post('/todos', authenticateJwt, (req:Request, res:Response) => {
   const { title, description } = req.body;
   const done = false;
-  const userId = req.userId;
+  const userId = req.headers['userId'];
 
   const newTodo = new Todo({ title, description, done, userId });
 
@@ -14,15 +21,15 @@ router.post('/todos', authenticateJwt, (req, res) => {
     .then((savedTodo) => {
       res.status(201).json(savedTodo);
     })
-    .catch((err) => {
+    .catch((err:Error) => {
       res.status(500).json({ error: 'Failed to create a new todo' });
     });
 });
 
 
 router.get('/todos', authenticateJwt, (req, res) => {
-  const userId = req.userId;
 
+  const userId = req.headers['userId'];
   Todo.find({ userId })
     .then((todos) => {
       res.json(todos);
@@ -32,9 +39,9 @@ router.get('/todos', authenticateJwt, (req, res) => {
     });
 });
 
-router.patch('/todos/:todoId/done', authenticateJwt, (req, res) => {
+router.patch('/todos/:todoId/done', authenticateJwt, (req:Request, res:Response) => {
   const { todoId } = req.params;
-  const userId = req.userId;
+  const userId = req.headers['userId'];
 
   Todo.findOneAndUpdate({ _id: todoId, userId }, { done: true }, { new: true })
     .then((updatedTodo) => {
@@ -43,9 +50,9 @@ router.patch('/todos/:todoId/done', authenticateJwt, (req, res) => {
       }
       res.json(updatedTodo);
     })
-    .catch((err) => {
+    .catch((err : Error) => {
       res.status(500).json({ error: 'Failed to update todo' });
     });
 });
 
-module.exports = router;
+export default router;
